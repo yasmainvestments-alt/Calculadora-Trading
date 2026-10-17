@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Trading - YasmaStark</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        neon: {
+                            red: '#ff0033',
+                            glow: '#ff2a5f',
+                            dark: '#080103',
+                            card: 'rgba(18, 4, 7, 0.88)',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        tech: ['Orbitron', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace'],
+                    },
+                    boxShadow: {
+                        'neon-glow': '0 0 25px rgba(255, 0, 51, 0.45), inset 0 0 10px rgba(255, 0, 51, 0.2)',
+                        'neon-button': '0 0 22px rgba(255, 0, 51, 0.65)',
+                        'ios-card': '0 25px 50px -12px rgba(0, 0, 0, 0.95)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(8, 1, 3, 0.95);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 0, 51, 0.4);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 0, 51, 0.85);
+        }
+
+        /* iOS Blur & Spring Effects */
+        .ios-blur {
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+        }
+
+        .ios-btn {
+            transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease, background 0.2s;
+        }
+
+        .ios-btn:active {
+            transform: scale(0.95);
+        }
+
+        .neon-input-wrap {
+            border: 1px solid rgba(255, 0, 51, 0.28);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .neon-input-wrap:focus-within, .neon-input-wrap.active-keypad-field {
+            border-color: #ff0033;
+            box-shadow: 0 0 20px rgba(255, 0, 51, 0.45);
+        }
+
+        .glow-text {
+            text-shadow: 0 0 12px rgba(255, 0, 51, 0.85);
+        }
+
+        /* Background Particles */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Toast Popup */
+        #toast {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Keypad Styles */
+        .keypad-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 0, 51, 0.2);
+            transition: all 0.15s ease;
+        }
+        .keypad-btn:active {
+            background: rgba(255, 0, 51, 0.4);
+            transform: scale(0.92);
+        }
+    </style>
+</head>
+<body class="bg-[#040002] text-gray-100 font-sans min-h-screen flex flex-col justify-between selection:bg-neon-red selection:text-white relative overflow-x-hidden">
+
+    <!-- Canvas de Partículas Neón -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 z-50 bg-neon-card border border-neon-red/60 text-white px-5 py-3 rounded-2xl shadow-neon-glow ios-blur flex items-center gap-3 opacity-0 translate-y-[-20px] pointer-events-none">
+        <i data-lucide="check-circle-2" class="w-5 h-5 text-neon-red"></i>
+        <span id="toast-msg" class="text-xs font-tech font-bold">Notificación</span>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div class="relative z-10 max-w-6xl mx-auto w-full px-4 py-8 md:py-10 flex-grow flex flex-col justify-center">
+
+        <!-- Header -->
+        <header class="text-center mb-8 transform transition-all duration-500 hover:scale-105">
+            <div class="inline-flex items-center gap-2 bg-neon-dark/90 px-4 py-1.5 rounded-full border border-neon-red/40 mb-3 shadow-lg ios-blur">
+                <span class="w-2 h-2 rounded-full bg-neon-red animate-ping"></span>
+                <span class="text-xs uppercase tracking-widest text-gray-300 font-tech">Real-Time Trading Engine</span>
+            </div>
+            <h1 class="text-3xl md:text-5xl font-black font-tech tracking-tight text-white mb-2">
+                CALCULADORA DE <span class="text-neon-red glow-text">TRADING</span>
+            </h1>
+            <p class="text-sm md:text-base text-gray-400 font-light flex items-center justify-center gap-2">
+                Diseñado & Desarrollado por 
+                <span class="font-tech text-neon-red font-semibold tracking-wider glow-text border-b border-neon-red/40 pb-0.5">By: YasmaStark</span>
+            </p>
+        </header>
+
+        <!-- Barra Superior con Botón Historial & Teclado -->
+        <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+            <button onclick="toggleKeypad()" class="px-4 py-2.5 rounded-2xl bg-black/60 border border-neon-red/30 text-gray-300 hover:text-white hover:border-neon-red text-xs font-tech font-bold ios-btn flex items-center gap-2 ios-blur">
+                <i data-lucide="calculator" class="w-4 h-4 text-neon-red"></i>
+                <span id="keypad-toggle-text">ABRIR TECLADO TÁCTIL</span>
+            </button>
+
+            <button onclick="toggleHistoryModal()" class="px-5 py-2.5 rounded-2xl bg-neon-card border border-neon-red/40 text-white hover:border-neon-red text-xs font-tech font-bold ios-btn flex items-center gap-2 shadow-neon-glow ios-blur">
+                <i data-lucide="history" class="w-4 h-4 text-neon-red"></i>
+                VER HISTORIAL (<span id="history-count">0</span>)
+            </button>
+        </div>
+
+        <!-- Rejilla de los 3 Módulos -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+            <!-- MÓDULO 1: Capital Inicial -->
+            <section class="bg-neon-card border border-neon-red/30 rounded-3xl p-6 shadow-ios-card ios-blur flex flex-col justify-between transition-all duration-300 hover:border-neon-red/70">
+                <div>
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="p-3 rounded-2xl bg-neon-red/10 border border-neon-red/30 text-neon-red">
+                            <i data-lucide="percent" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-tech text-base font-bold text-white">1. Capital Inicial</h2>
+                            <p class="text-xs text-gray-400">Porcentaje directo (Math.ceil)</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider">Capital Base ($)</label>
+                        <div class="relative rounded-2xl bg-black/60 neon-input-wrap overflow-hidden" id="wrap-m1-base">
+                            <input type="number" id="m1-base" placeholder="Ej: 100" step="any"
+                                onclick="setActiveField('m1-base')"
+                                class="calc-trigger-1 w-full bg-transparent px-4 py-3 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono">
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider">Porcentaje (%)</label>
+                        <div class="relative rounded-2xl bg-black/60 neon-input-wrap overflow-hidden" id="wrap-m1-percent">
+                            <input type="number" id="m1-percent" placeholder="Ej: 15" step="any"
+                                onclick="setActiveField('m1-percent')"
+                                class="calc-trigger-1 w-full bg-transparent px-4 py-3 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-white/5">
+                    <div class="bg-black/80 rounded-2xl p-4 mb-4 border border-neon-red/20">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs text-gray-400">Resultado Redondeado:</span>
+                            <span id="m1-exact" class="text-[10px] text-gray-500 font-mono">Exacto: $0.00</span>
+                        </div>
+                        <div class="flex items-baseline justify-between">
+                            <span id="m1-result" class="text-3xl font-black text-neon-red font-tech glow-text">$0</span>
+                            <span class="text-[10px] text-neon-red font-semibold bg-neon-red/15 px-2.5 py-1 rounded-full border border-neon-red/30">Math.ceil ↑</span>
+                        </div>
+                    </div>
+                    <button onclick="saveModule1ToHistory()" 
+                        class="w-full py-3.5 px-4 bg-gradient-to-r from-neon-red to-red-700 hover:from-red-600 hover:to-neon-red text-white font-tech text-xs font-bold rounded-2xl shadow-neon-button ios-btn flex items-center justify-center gap-2">
+                        <i data-lucide="bookmark-plus" class="w-4 h-4"></i>
+                        GUARDAR EN HISTORIAL
+                    </button>
+                </div>
+            </section>
+
+            <!-- MÓDULO 2: Calculo del Limite -->
+            <section class="bg-neon-card border border-neon-red/40 rounded-3xl p-6 shadow-ios-card ios-blur flex flex-col justify-between transition-all duration-300 hover:border-neon-red relative overflow-hidden">
+                <div class="absolute -top-12 -right-12 w-28 h-28 bg-neon-red/15 rounded-full blur-2xl pointer-events-none"></div>
+                <div>
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="p-3 rounded-2xl bg-neon-red/15 border border-neon-red/40 text-neon-red shadow-neon-glow">
+                            <i data-lucide="trending-up" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-tech text-base font-bold text-white">2. Calculo del Limite</h2>
+                            <p class="text-xs text-gray-400">Inversión + % Ganancia + $2</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider">Inversión Base ($)</label>
+                        <div class="relative rounded-2xl bg-black/60 neon-input-wrap overflow-hidden" id="wrap-m2-base">
+                            <input type="number" id="m2-base" placeholder="Ej: 100" step="any"
+                                onclick="setActiveField('m2-base')"
+                                class="calc-trigger-2 w-full bg-transparent px-4 py-3 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono">
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider">Porcentaje Ganancia (%)</label>
+                        <div class="relative rounded-2xl bg-black/60 neon-input-wrap overflow-hidden" id="wrap-m2-percent">
+                            <input type="number" id="m2-percent" placeholder="Ej: 10" step="any"
+                                onclick="setActiveField('m2-percent')"
+                                class="calc-trigger-2 w-full bg-transparent px-4 py-3 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-white/5">
+                    <div class="bg-black/80 rounded-2xl p-4 mb-4 border border-neon-red/25 shadow-inner space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-400">Ganancia + $2:</span>
+                            <span id="m2-profit" class="text-sm font-bold text-gray-200 font-mono">$0</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-1.5 border-t border-white/10">
+                            <div>
+                                <span class="block text-xs text-gray-300 font-semibold">Total Límite:</span>
+                                <span id="m2-exact" class="text-[10px] text-gray-500 font-mono">Exacto: $0.00</span>
+                            </div>
+                            <span id="m2-total" class="text-3xl font-black text-neon-red font-tech glow-text">$0</span>
+                        </div>
+                    </div>
+                    <button onclick="saveModule2ToHistory()" 
+                        class="w-full py-3.5 px-4 bg-gradient-to-r from-neon-red to-red-700 hover:from-red-600 hover:to-neon-red text-white font-tech text-xs font-bold rounded-2xl shadow-neon-button ios-btn flex items-center justify-center gap-2">
+                        <i data-lucide="bookmark-plus" class="w-4 h-4"></i>
+                        GUARDAR EN HISTORIAL
+                    </button>
+                </div>
+            </section>
+
+            <!-- MÓDULO 3: Gestión de Riesgo -->
+            <section class="bg-neon-card border border-neon-red/30 rounded-3xl p-6 shadow-ios-card ios-blur flex flex-col justify-between transition-all duration-300 hover:border-neon-red/70">
+                <div>
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="p-3 rounded-2xl bg-neon-red/10 border border-neon-red/30 text-neon-red">
+                            <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-tech text-base font-bold text-white">3. Gestión de Riesgo</h2>
+                            <p class="text-xs text-gray-400">Riesgo Máximo & Precio de Salida</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider">Capital / Posición ($)</label>
+                        <div class="relative rounded-2xl bg-black/60 neon-input-wrap overflow-hidden" id="wrap-m3-base">
+                            <input type="number" id="m3-base" placeholder="Ej: 100" step="any"
+                                onclick="setActiveField('m3-base')"
+                                class="calc-trigger-3 w-full bg-transparent px-4 py-3 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono">
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider">% Máximo Riesgo (%)</label>
+                        <div class="relative rounded-2xl bg-black/60 neon-input-wrap overflow-hidden" id="wrap-m3-percent">
+                            <input type="number" id="m3-percent" placeholder="Ej: 5" step="any"
+                                onclick="setActiveField('m3-percent')"
+                                class="calc-trigger-3 w-full bg-transparent px-4 py-3 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-white/5">
+                    <div class="bg-black/80 rounded-2xl p-4 mb-4 border border-neon-red/20 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-400">Riesgo Máximo ($):</span>
+                            <span id="m3-loss" class="text-base font-bold text-red-500 font-tech">$0</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-1 border-t border-white/10">
+                            <span class="text-xs text-gray-300 font-semibold">Precio de Salida (Stop):</span>
+                            <span id="m3-stop" class="text-2xl font-black text-neon-red font-tech glow-text">$0</span>
+                        </div>
+                    </div>
+                    <button onclick="saveModule3ToHistory()" 
+                        class="w-full py-3.5 px-4 bg-gradient-to-r from-neon-red to-red-700 hover:from-red-600 hover:to-neon-red text-white font-tech text-xs font-bold rounded-2xl shadow-neon-button ios-btn flex items-center justify-center gap-2">
+                        <i data-lucide="bookmark-plus" class="w-4 h-4"></i>
+                        GUARDAR EN HISTORIAL
+                    </button>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- TECLADO TÁCTIL MÓVIL DESPLEGABLE -->
+        <div id="touch-keypad" class="hidden mb-8 bg-neon-card border border-neon-red/40 rounded-3xl p-5 shadow-ios-card ios-blur max-w-sm mx-auto">
+            <div class="flex justify-between items-center mb-3 pb-2 border-b border-white/10">
+                <span class="text-xs font-tech font-bold text-gray-300">TECLADO TÁCTIL RÁPIDO</span>
+                <span id="active-field-name" class="text-[10px] text-neon-red font-mono font-bold uppercase">Selecciona casilla</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2 font-tech font-bold text-lg text-white">
+                <button onclick="pressKey('1')" class="keypad-btn py-3 rounded-xl">1</button>
+                <button onclick="pressKey('2')" class="keypad-btn py-3 rounded-xl">2</button>
+                <button onclick="pressKey('3')" class="keypad-btn py-3 rounded-xl">3</button>
+                <button onclick="pressKey('4')" class="keypad-btn py-3 rounded-xl">4</button>
+                <button onclick="pressKey('5')" class="keypad-btn py-3 rounded-xl">5</button>
+                <button onclick="pressKey('6')" class="keypad-btn py-3 rounded-xl">6</button>
+                <button onclick="pressKey('7')" class="keypad-btn py-3 rounded-xl">7</button>
+                <button onclick="pressKey('8')" class="keypad-btn py-3 rounded-xl">8</button>
+                <button onclick="pressKey('9')" class="keypad-btn py-3 rounded-xl">9</button>
+                <button onclick="pressKey('.')" class="keypad-btn py-3 rounded-xl text-neon-red">.</button>
+                <button onclick="pressKey('0')" class="keypad-btn py-3 rounded-xl">0</button>
+                <button onclick="pressKey('DEL')" class="keypad-btn py-3 rounded-xl text-red-400 flex items-center justify-center">
+                    <i data-lucide="backspace" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <button onclick="pressKey('CLR')" class="w-full mt-2 py-2 rounded-xl bg-red-950/60 border border-red-500/40 text-red-300 text-xs font-tech font-bold hover:bg-red-900/60">
+                LIMPIAR CAMPO
+            </button>
+        </div>
+
+    </div>
+
+    <!-- MODAL HISTORIAL -->
+    <div id="history-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-neon-card border border-neon-red/40 rounded-3xl max-w-3xl w-full p-6 shadow-2xl transform scale-95 transition-all duration-300 ios-blur flex flex-col max-h-[85vh]">
+            <div class="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 rounded-2xl bg-neon-red/15 border border-neon-red/40 text-neon-red">
+                        <i data-lucide="history" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-tech text-lg font-bold text-white">Historial de Operaciones</h3>
+                        <p class="text-xs text-gray-400">Almacenado localmente</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="clearHistory()" class="px-3.5 py-2 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 text-xs font-semibold ios-btn flex items-center gap-1.5">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        Borrar
+                    </button>
+                    <button onclick="toggleHistoryModal()" class="p-2 rounded-xl bg-white/10 text-gray-300 hover:text-white ios-btn">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-y-auto flex-grow rounded-2xl border border-white/10 bg-black/60">
+                <table class="w-full text-left border-collapse">
+                    <thead class="sticky top-0 bg-[#0c0205] border-b border-white/10 text-[11px] font-tech text-gray-400 uppercase tracking-wider z-10">
+                        <tr>
+                            <th class="py-3 px-4">Hora</th>
+                            <th class="py-3 px-4">Módulo</th>
+                            <th class="py-3 px-4">Entradas</th>
+                            <th class="py-3 px-4 text-right">Resultado</th>
+                            <th class="py-3 px-4 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body" class="divide-y divide-white/5 text-sm font-mono">
+                        <!-- Carga Dinámica -->
+                    </tbody>
+                </table>
+                <div id="empty-history" class="py-12 text-center text-gray-500 text-sm">
+                    No hay operaciones guardadas en el historial.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Signature -->
+    <footer class="relative z-10 text-center py-6 border-t border-white/5 bg-black/80 ios-blur mt-8">
+        <p class="text-xs text-gray-500 font-tech">
+            &copy; <span id="year">2026</span> | Estética Neón & Animaciones iOS <span class="text-neon-red font-bold glow-text">By: YasmaStark</span>
+        </p>
+    </footer>
+
+    <!-- LÓGICA JAVASCRIPT COMPLETA -->
+    <script>
+        const STORAGE_KEY = 'yasma_neon_calc_history_v3';
+        let history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        let activeInputId = 'm1-base';
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const msg = document.getElementById('toast-msg');
+            msg.textContent = message;
+            toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
+            }, 2500);
+        }
+
+        function formatCurrency(val) {
+            if (isNaN(val) || val === null) return '$0.00';
+            return '$' + Number(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function setActiveField(id) {
+            activeInputId = id;
+            document.querySelectorAll('.neon-input-wrap').forEach(el => el.classList.remove('active-keypad-field'));
+            const wrap = document.getElementById(`wrap-${id}`);
+            if (wrap) wrap.classList.add('active-keypad-field');
+            
+            const fieldNames = {
+                'm1-base': 'Cap. Base Módulo 1',
+                'm1-percent': '% Módulo 1',
+                'm2-base': 'Inversión Módulo 2',
+                'm2-percent': '% Módulo 2',
+                'm3-base': 'Capital Módulo 3',
+                'm3-percent': '% Riesgo Módulo 3'
+            };
+            document.getElementById('active-field-name').textContent = fieldNames[id] || id;
+        }
+
+        function toggleKeypad() {
+            const keypad = document.getElementById('touch-keypad');
+            const toggleText = document.getElementById('keypad-toggle-text');
+            if (keypad.classList.contains('hidden')) {
+                keypad.classList.remove('hidden');
+                toggleText.textContent = 'OCULTAR TECLADO TÁCTIL';
+                setActiveField(activeInputId);
+            } else {
+                keypad.classList.add('hidden');
+                toggleText.textContent = 'ABRIR TECLADO TÁCTIL';
+            }
+        }
+
+        function pressKey(key) {
+            const input = document.getElementById(activeInputId);
+            if (!input) return;
+
+            if (key === 'DEL') {
+                input.value = input.value.slice(0, -1);
+            } else if (key === 'CLR') {
+                input.value = '';
+            } else {
+                if (key === '.' && input.value.includes('.')) return;
+                input.value += key;
+            }
+
+            // Trigger calculation event
+            input.dispatchEvent(new Event('input'));
+        }
+
+        /* ---------------- MÓDULO 1: Capital Inicial ---------------- */
+        function calculateModule1() {
+            const baseVal = parseFloat(document.getElementById('m1-base').value);
+            const percentVal = parseFloat(document.getElementById('m1-percent').value);
+
+            if (isNaN(baseVal) || isNaN(percentVal) || baseVal <= 0) {
+                document.getElementById('m1-exact').textContent = 'Exacto: $0.00';
+                document.getElementById('m1-result').textContent = '$0';
+                return null;
+            }
+
+            const exact = baseVal * (percentVal / 100);
+            const rounded = Math.ceil(exact);
+
+            document.getElementById('m1-exact').textContent = `Exacto: ${formatCurrency(exact)}`;
+            document.getElementById('m1-result').textContent = `$${rounded}`;
+
+            return { baseVal, percentVal, exact, rounded };
+        }
+
+        function saveModule1ToHistory() {
+            const res = calculateModule1();
+            if (!res) {
+                showToast('Ingresa datos válidos en Capital Inicial');
+                return;
+            }
+            addHistoryRecord({
+                id: Date.now(),
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                type: 'Capital Inicial',
+                inputs: `$${res.baseVal} × ${res.percentVal}%`,
+                result: `$${res.rounded} (Ex: $${res.exact.toFixed(2)})`,
+                copyVal: res.rounded
+            });
+            showToast(`Capital Inicial Guardado: $${res.rounded}`);
+        }
+
+        /* ---------------- MÓDULO 2: Calculo del Limite ---------------- */
+        function calculateModule2() {
+            const baseVal = parseFloat(document.getElementById('m2-base').value);
+            const percentVal = parseFloat(document.getElementById('m2-percent').value);
+
+            if (isNaN(baseVal) || isNaN(percentVal) || baseVal <= 0) {
+                document.getElementById('m2-profit').textContent = '$0';
+                document.getElementById('m2-exact').textContent = 'Exacto: $0.00';
+                document.getElementById('m2-total').textContent = '$0';
+                return null;
+            }
+
+            const profitExact = (baseVal * (percentVal / 100)) + 2;
+            const profitRounded = Math.ceil(profitExact);
+            
+            const totalExact = baseVal + profitExact;
+            const totalRounded = Math.ceil(totalExact);
+
+            document.getElementById('m2-profit').textContent = `$${profitRounded}`;
+            document.getElementById('m2-exact').textContent = `Exacto: ${formatCurrency(totalExact)}`;
+            document.getElementById('m2-total').textContent = `$${totalRounded}`;
+
+            return { baseVal, percentVal, profitRounded, totalExact, totalRounded };
+        }
+
+        function saveModule2ToHistory() {
+            const res = calculateModule2();
+            if (!res) {
+                showToast('Ingresa datos válidos en Calculo del Limite');
+                return;
+            }
+            addHistoryRecord({
+                id: Date.now(),
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                type: 'Calculo del Limite',
+                inputs: `Inv: $${res.baseVal} | +${res.percentVal}% + $2`,
+                result: `Límite: $${res.totalRounded} (+ $${res.profitRounded})`,
+                copyVal: res.totalRounded
+            });
+            showToast(`Calculo del Limite Guardado: Total $${res.totalRounded}`);
+        }
+
+        /* ---------------- MÓDULO 3: Gestión de Riesgo ---------------- */
+        function calculateModule3() {
+            const baseVal = parseFloat(document.getElementById('m3-base').value);
+            const percentVal = parseFloat(document.getElementById('m3-percent').value);
+
+            if (isNaN(baseVal) || isNaN(percentVal) || baseVal <= 0) {
+                document.getElementById('m3-loss').textContent = '$0';
+                document.getElementById('m3-stop').textContent = '$0';
+                return null;
+            }
+
+            const riskDollars = Math.ceil(baseVal * (percentVal / 100));
+            const exitLevel = baseVal - riskDollars;
+
+            document.getElementById('m3-loss').textContent = `$${riskDollars}`;
+            document.getElementById('m3-stop').textContent = `$${exitLevel}`;
+
+            return { baseVal, percentVal, riskDollars, exitLevel };
+        }
+
+        function saveModule3ToHistory() {
+            const res = calculateModule3();
+            if (!res) {
+                showToast('Ingresa datos válidos en Gestión de Riesgo');
+                return;
+            }
+            addHistoryRecord({
+                id: Date.now(),
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                type: 'Gestión de Riesgo',
+                inputs: `Cap: $${res.baseVal} | Riesgo: ${res.percentVal}%`,
+                result: `Stop: $${res.exitLevel} (Riesgo: $${res.riskDollars})`,
+                copyVal: res.exitLevel
+            });
+            showToast(`Gestión de Riesgo Guardado: Stop en $${res.exitLevel}`);
+        }
+
+        /* ---------------- HISTORIAL & LOCALSTORAGE ---------------- */
+        function toggleHistoryModal() {
+            const modal = document.getElementById('history-modal');
+            const isHidden = modal.classList.contains('pointer-events-none');
+
+            if (isHidden) {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modal.firstElementChild.classList.remove('scale-95');
+                modal.firstElementChild.classList.add('scale-100');
+            } else {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                modal.firstElementChild.classList.remove('scale-100');
+                modal.firstElementChild.classList.add('scale-95');
+            }
+        }
+
+        function addHistoryRecord(entry) {
+            history.unshift(entry);
+            if (history.length > 50) history.pop();
+            saveHistory();
+            renderHistory();
+        }
+
+        function deleteHistoryItem(id) {
+            history = history.filter(item => item.id !== id);
+            saveHistory();
+            renderHistory();
+            showToast('Elemento eliminado del historial');
+        }
+
+        function saveHistory() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+            document.getElementById('history-count').textContent = history.length;
+        }
+
+        function clearHistory() {
+            if (history.length === 0) return;
+            history = [];
+            saveHistory();
+            renderHistory();
+            showToast('Historial vaciado completamente');
+        }
+
+        function copyToClipboard(val) {
+            const textarea = document.createElement('textarea');
+            textarea.value = val;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast(`Copiado: $${val}`);
+            } catch (err) {
+                showToast('Error al copiar');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function renderHistory() {
+            const tbody = document.getElementById('history-table-body');
+            const emptyMsg = document.getElementById('empty-history');
+
+            document.getElementById('history-count').textContent = history.length;
+            tbody.innerHTML = '';
+
+            if (history.length === 0) {
+                emptyMsg.classList.remove('hidden');
+                return;
+            }
+
+            emptyMsg.classList.add('hidden');
+
+            history.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-white/5 transition-colors border-b border-white/5";
+                row.innerHTML = `
+                    <td class="py-3 px-4 text-xs text-gray-400 font-mono">${item.timestamp}</td>
+                    <td class="py-3 px-4 text-xs font-semibold text-neon-red font-sans">${item.type}</td>
+                    <td class="py-3 px-4 text-xs font-mono text-gray-300">${item.inputs}</td>
+                    <td class="py-3 px-4 text-xs font-tech font-bold text-white text-right glow-text">${item.result}</td>
+                    <td class="py-3 px-4 text-center flex items-center justify-center gap-1.5">
+                        <button onclick="copyToClipboard('${item.copyVal}')" 
+                            title="Copiar resultado"
+                            class="p-1.5 rounded-lg bg-white/5 hover:bg-neon-red/20 text-gray-300 hover:text-neon-red transition-all ios-btn">
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                        </button>
+                        <button onclick="deleteHistoryItem(${item.id})" 
+                            title="Eliminar registro"
+                            class="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/25 text-red-400 transition-all ios-btn">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+
+        /* ---------------- CANVAS PARTÍCULAS INTERACTIVAS ---------------- */
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const particleCount = 55;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.8;
+                this.speedX = (Math.random() * 0.5) - 0.25;
+                this.speedY = (Math.random() * -0.5) - 0.2;
+                this.alpha = Math.random() * 0.7 + 0.3;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.y < 0) {
+                    this.y = canvas.height;
+                    this.x = Math.random() * canvas.width;
+                }
+                if (this.x < 0 || this.x > canvas.width) {
+                    this.x = Math.random() * canvas.width;
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = `rgba(255, 0, 51, ${this.alpha})`;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#ff0033';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function drawLines() {
+            for (let a = 0; a < particles.length; a++) {
+                for (let b = a + 1; b < particles.length; b++) {
+                    const dx = particles[a].x - particles[b].x;
+                    const dy = particles[a].y - particles[b].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 110) {
+                        const opacity = (1 - dist / 110) * 0.22;
+                        ctx.strokeStyle = `rgba(255, 0, 51, ${opacity})`;
+                        ctx.lineWidth = 0.6;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[a].x, particles[a].y);
+                        ctx.lineTo(particles[b].x, particles[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            drawLines();
+            requestAnimationFrame(animate);
+        }
+
+        /* ---------------- INICIALIZACIÓN ---------------- */
+        window.onload = function() {
+            resizeCanvas();
+            initParticles();
+            animate();
+            renderHistory();
+            setActiveField('m1-base');
+
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+            // Triggers en tiempo real
+            document.querySelectorAll('.calc-trigger-1').forEach(input => {
+                input.addEventListener('input', calculateModule1);
+                input.addEventListener('keyup', calculateModule1);
+                input.addEventListener('change', calculateModule1);
+            });
+
+            document.querySelectorAll('.calc-trigger-2').forEach(input => {
+                input.addEventListener('input', calculateModule2);
+                input.addEventListener('keyup', calculateModule2);
+                input.addEventListener('change', calculateModule2);
+            });
+
+            document.querySelectorAll('.calc-trigger-3').forEach(input => {
+                input.addEventListener('input', calculateModule3);
+                input.addEventListener('keyup', calculateModule3);
+                input.addEventListener('change', calculateModule3);
+            });
+
+            document.getElementById('year').textContent = new Date().getFullYear();
+        };
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            initParticles();
+        });
+    </script>
+</body>
+</html>
