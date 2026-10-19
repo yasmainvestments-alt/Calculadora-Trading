@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Trading - YasmaStark</title>
+    
+    <!-- Favicon SVG Red Neón & Negro -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%23080103'/><path d='M12 44 L28 28 L38 38 L52 18' stroke='%23ff0033' stroke-width='5' stroke-linecap='round' stroke-linejoin='round' fill='none' filter='drop-shadow(0 0 6px %23ff0033)'/><text x='16' y='52' fill='%23ffffff' font-family='sans-serif' font-weight='bold' font-size='12'>$⚡</text></svg>">
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -278,7 +282,10 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider">Capital / Posición ($)</label>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider">Capital / Posición ($)</label>
+                            <span class="text-[10px] text-neon-red font-mono font-semibold">Auto-Sync</span>
+                        </div>
                         <div class="relative rounded-2xl bg-black/60 neon-input-wrap overflow-hidden" id="wrap-m3-base">
                             <input type="number" id="m3-base" placeholder="Ej: 100" step="any"
                                 onclick="setActiveField('m3-base')"
@@ -507,10 +514,18 @@
             showToast(`Capital Inicial Guardado: $${res.rounded}`);
         }
 
-        /* ---------------- MÓDULO 2: Calculo del Limite ---------------- */
+        /* ---------------- MÓDULO 2: Calculo del Limite (Con Auto-Sync) ---------------- */
         function calculateModule2() {
-            const baseVal = parseFloat(document.getElementById('m2-base').value);
+            const baseInput = document.getElementById('m2-base');
+            const baseVal = parseFloat(baseInput.value);
             const percentVal = parseFloat(document.getElementById('m2-percent').value);
+
+            // AUTO-SYNC AUTOMÁTICO HACIA EL MÓDULO 3
+            const m3BaseInput = document.getElementById('m3-base');
+            if (m3BaseInput) {
+                m3BaseInput.value = baseInput.value;
+                calculateModule3();
+            }
 
             if (isNaN(baseVal) || isNaN(percentVal) || baseVal <= 0) {
                 document.getElementById('m2-profit').textContent = '$0';
