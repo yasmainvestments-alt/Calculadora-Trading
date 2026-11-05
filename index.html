@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#040002">
+    <meta name="description" content="Calculadora de trading: capital inicial, cálculo del límite y gestión de riesgo. Por YasmaStark.">
     <title>Calculadora de Trading - YasmaStark</title>
-    
+
     <!-- Favicon SVG Red Neón & Negro -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%23080103'/><path d='M12 44 L28 28 L38 38 L52 18' stroke='%23ff0033' stroke-width='5' stroke-linecap='round' stroke-linejoin='round' fill='none' filter='drop-shadow(0 0 6px %23ff0033)'/><text x='16' y='52' fill='%23ffffff' font-family='sans-serif' font-weight='bold' font-size='12'>$⚡</text></svg>">
 
@@ -23,10 +25,10 @@
                 extend: {
                     colors: {
                         neon: {
-                            red: '#ff0033',
-                            glow: '#ff2a5f',
+                            red: 'var(--neon-main)',
+                            glow: 'var(--neon-glow-color)',
                             dark: '#080103',
-                            card: 'rgba(18, 4, 7, 0.88)',
+                            card: 'var(--neon-card-bg)',
                         }
                     },
                     fontFamily: {
@@ -35,8 +37,8 @@
                         mono: ['Share Tech Mono', 'monospace'],
                     },
                     boxShadow: {
-                        'neon-glow': '0 0 25px rgba(255, 0, 51, 0.45), inset 0 0 10px rgba(255, 0, 51, 0.2)',
-                        'neon-button': '0 0 22px rgba(255, 0, 51, 0.65)',
+                        'neon-glow': 'var(--neon-box-glow)',
+                        'neon-button': 'var(--neon-btn-glow)',
                         'ios-card': '0 25px 50px -12px rgba(0, 0, 0, 0.95)',
                     }
                 }
@@ -45,6 +47,41 @@
     </script>
 
     <style>
+        :root {
+            --neon: #ff0033;
+            --neon-main: #ff0033;
+            --neon-glow-color: #ff2a5f;
+            --neon-soft: rgba(255, 0, 51, 0.22);
+            --neon-rgb: 255, 0, 51;
+            --neon-card-bg: rgba(18, 4, 7, 0.88);
+            --neon-box-glow: 0 0 25px rgba(255, 0, 51, 0.45), inset 0 0 10px rgba(255, 0, 51, 0.2);
+            --neon-btn-glow: 0 0 22px rgba(255, 0, 51, 0.65);
+            --ink: #040002;
+        }
+
+        /* Tema Cyan Neón (#00ffff) */
+        [data-theme="cyan"] {
+            --neon: #00ffff;
+            --neon-main: #00ffff;
+            --neon-glow-color: #5dffff;
+            --neon-soft: rgba(0, 255, 255, 0.22);
+            --neon-rgb: 0, 255, 255;
+            --neon-card-bg: rgba(4, 16, 20, 0.88);
+            --neon-box-glow: 0 0 25px rgba(0, 255, 255, 0.45), inset 0 0 10px rgba(0, 255, 255, 0.2);
+            --neon-btn-glow: 0 0 22px rgba(0, 255, 255, 0.65);
+        }
+
+        html { 
+            scroll-behavior: smooth; 
+            height: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
@@ -54,11 +91,11 @@
             background: rgba(8, 1, 3, 0.95);
         }
         ::-webkit-scrollbar-thumb {
-            background: rgba(255, 0, 51, 0.4);
+            background: rgba(var(--neon-rgb), 0.4);
             border-radius: 9999px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 0, 51, 0.85);
+            background: rgba(var(--neon-rgb), 0.85);
         }
 
         /* iOS Blur & Spring Effects */
@@ -68,25 +105,39 @@
         }
 
         .ios-btn {
-            transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease, background 0.2s;
+            transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease, background 0.2s, border-color 0.2s, color 0.2s;
         }
 
         .ios-btn:active {
             transform: scale(0.95);
         }
 
-        .neon-input-wrap {
-            border: 1px solid rgba(255, 0, 51, 0.28);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        /* ---------- Fondo atmosférico ---------- */
+        .bg-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(1100px 620px at 50% -12%, rgba(var(--neon-rgb), 0.20), transparent 68%),
+                radial-gradient(820px 520px at 100% 108%, rgba(var(--neon-rgb), 0.12), transparent 70%),
+                radial-gradient(600px 400px at 0% 60%, rgba(var(--neon-rgb), 0.06), transparent 70%),
+                #040002;
+            transition: background 0.5s ease;
         }
 
-        .neon-input-wrap:focus-within, .neon-input-wrap.active-keypad-field {
-            border-color: #ff0033;
-            box-shadow: 0 0 20px rgba(255, 0, 51, 0.45);
-        }
-
-        .glow-text {
-            text-shadow: 0 0 12px rgba(255, 0, 51, 0.85);
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.35;
+            background-image:
+                linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+            background-size: 64px 64px;
+            mask-image: radial-gradient(circle at 50% 0%, black, transparent 78%);
+            -webkit-mask-image: radial-gradient(circle at 50% 0%, black, transparent 78%);
         }
 
         /* Background Particles */
@@ -100,381 +151,417 @@
             pointer-events: none;
         }
 
-        /* Toast Popup */
-        #toast {
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        /* ---------- Tarjetas ---------- */
+        .card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1.5rem;
+            background: var(--neon-card-bg);
+            border: 1px solid rgba(var(--neon-rgb), 0.20);
+            box-shadow:
+                0 34px 60px -32px rgba(0, 0, 0, 0.98),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transition: border-color 0.3s ease, box-shadow 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background 0.5s ease;
         }
 
-        /* Keypad Styles */
-        .keypad-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 0, 51, 0.2);
-            transition: all 0.15s ease;
+        .card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            background: radial-gradient(420px 160px at 50% -10%, rgba(var(--neon-rgb), 0.16), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.35s ease;
         }
-        .keypad-btn:active {
-            background: rgba(255, 0, 51, 0.4);
-            transform: scale(0.92);
+
+        .card:hover {
+            border-color: rgba(var(--neon-rgb), 0.55);
+            box-shadow:
+                0 40px 70px -32px rgba(0, 0, 0, 1),
+                0 0 44px -16px rgba(var(--neon-rgb), 0.55),
+                inset 0 1px 0 rgba(255, 255, 255, 0.07);
+            transform: translateY(-2px);
+        }
+
+        .card:hover::after { opacity: 1; }
+
+        .card-featured {
+            border-color: rgba(var(--neon-rgb), 0.42);
+            box-shadow:
+                0 40px 70px -30px rgba(0, 0, 0, 1),
+                0 0 50px -18px rgba(var(--neon-rgb), 0.45),
+                inset 0 1px 0 rgba(255, 255, 255, 0.07);
+        }
+
+        .card-index {
+            font-size: 10px;
+            letter-spacing: 0.18em;
+            color: rgba(255, 255, 255, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 9999px;
+            padding: 2px 8px;
+            line-height: 1.5;
+        }
+
+        /* ---------- Inputs ---------- */
+        .neon-input-wrap {
+            border: 1px solid rgba(var(--neon-rgb), 0.28);
+            background: rgba(0, 0, 0, 0.62);
+            transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+        }
+
+        .neon-input-wrap:hover {
+            border-color: rgba(var(--neon-rgb), 0.45);
+        }
+
+        .neon-input-wrap:focus-within {
+            border-color: var(--neon-main);
+            box-shadow: 0 0 0 3px rgba(var(--neon-rgb), 0.14), 0 0 22px rgba(var(--neon-rgb), 0.35);
+            background: rgba(12, 0, 3, 0.85);
+        }
+
+        /* Quita las flechas de los number inputs para un look limpio */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        .neon-input-wrap.has-prefix input { padding-left: 2rem; }
+        .neon-input-wrap.has-suffix input { padding-right: 2rem; }
+
+        .unit {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            color: rgba(var(--neon-rgb), 0.75);
+            pointer-events: none;
+            user-select: none;
+        }
+        .unit-left { left: 0.85rem; }
+        .unit-right { right: 0.85rem; }
+
+        .glow-text {
+            text-shadow: 0 0 12px rgba(var(--neon-rgb), 0.85);
+            color: var(--neon-main);
+        }
+
+        .text-neon-red {
+            color: var(--neon-main) !important;
+        }
+
+        .bg-neon-red {
+            background-color: var(--neon-main) !important;
+        }
+
+        .border-neon-red {
+            border-color: var(--neon-main) !important;
+        }
+
+        .num { font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+
+        /* ---------- Paneles de resultado ---------- */
+        .result-panel {
+            border-radius: 1.25rem;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.62));
+            border: 1px solid rgba(var(--neon-rgb), 0.18);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .divider { border-top: 1px solid rgba(255, 255, 255, 0.08); }
+
+        .chip {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            padding: 3px 9px;
+            border-radius: 9999px;
+            border: 1px solid rgba(var(--neon-rgb), 0.32);
+            background: rgba(var(--neon-rgb), 0.14);
+            color: var(--neon-main);
+            white-space: nowrap;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        a:focus-visible {
+            outline: 2px solid rgba(var(--neon-rgb), 0.75);
+            outline-offset: 2px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .card, .card::after, .ios-btn { transition: none !important; }
+            .card:hover { transform: none; }
+            .animate-ping { animation: none !important; }
+        }
+
+        @media print {
+            .bg-layer, .bg-grid, #particleCanvas, footer { display: none !important; }
+            body { background: #fff !important; color: #000 !important; }
         }
     </style>
 </head>
-<body class="bg-[#040002] text-gray-100 font-sans min-h-screen flex flex-col justify-between selection:bg-neon-red selection:text-white relative overflow-x-hidden">
+<body class="text-gray-100 font-sans min-h-screen flex flex-col justify-between selection:bg-neon-red selection:text-white relative overflow-x-hidden">
+
+    <!-- Capas decorativas de fondo -->
+    <div class="bg-layer"></div>
+    <div class="bg-grid"></div>
 
     <!-- Canvas de Partículas Neón -->
     <canvas id="particleCanvas"></canvas>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed top-5 right-5 z-50 bg-neon-card border border-neon-red/60 text-white px-5 py-3 rounded-2xl shadow-neon-glow ios-blur flex items-center gap-3 opacity-0 translate-y-[-20px] pointer-events-none">
-        <i data-lucide="check-circle-2" class="w-5 h-5 text-neon-red"></i>
-        <span id="toast-msg" class="text-xs font-tech font-bold">Notificación</span>
-    </div>
-
     <!-- Contenido Principal -->
-    <div class="relative z-10 max-w-6xl mx-auto w-full px-4 py-8 md:py-10 flex-grow flex flex-col justify-center">
+    <div class="relative z-10 max-w-7xl mx-auto w-full px-3 sm:px-6 py-4 sm:py-8 flex-grow flex flex-col justify-center">
+
+        <!-- Selector de Tema Flotante (Esquina Superior Derecha) -->
+        <div class="flex justify-end mb-3">
+            <div class="inline-flex items-center gap-2 bg-black/60 px-3 py-1.5 rounded-2xl border border-neon-red/30 ios-blur shadow-md">
+                <i data-lucide="palette" class="w-4 h-4 text-neon-red"></i>
+                <label for="theme-select" class="text-[11px] sm:text-xs font-tech font-bold text-gray-300">TEMA:</label>
+                <select id="theme-select" onchange="changeTheme(this.value)" class="bg-transparent text-[11px] sm:text-xs font-tech font-bold text-white border-none focus:outline-none cursor-pointer">
+                    <option value="red" class="bg-black text-red-500 font-bold">Rojo Neón (#ff0033)</option>
+                    <option value="cyan" class="bg-black text-cyan-400 font-bold">Cyan Neón (#00ffff)</option>
+                </select>
+            </div>
+        </div>
 
         <!-- Header -->
-        <header class="text-center mb-8 transform transition-all duration-500 hover:scale-105">
-            <div class="inline-flex items-center gap-2 bg-neon-dark/90 px-4 py-1.5 rounded-full border border-neon-red/40 mb-3 shadow-lg ios-blur">
-                <span class="w-2 h-2 rounded-full bg-neon-red animate-ping"></span>
-                <span class="text-xs uppercase tracking-widest text-gray-300 font-tech">Real-Time Trading Engine</span>
+        <header class="text-center mb-6 sm:mb-8">
+            <div class="inline-flex items-center gap-2 bg-black/60 px-3.5 py-1 rounded-full border border-neon-red/35 mb-3 shadow-lg ios-blur">
+                <span class="relative flex w-2 h-2">
+                    <span class="absolute inline-flex h-full w-full rounded-full bg-neon-red opacity-70 animate-ping"></span>
+                    <span class="relative inline-flex rounded-full w-2 h-2 bg-neon-red"></span>
+                </span>
+                <span class="text-[9px] sm:text-xs uppercase tracking-[0.2em] text-gray-300 font-tech">Real-Time Trading Engine</span>
             </div>
-            <h1 class="text-3xl md:text-5xl font-black font-tech tracking-tight text-white mb-2">
-                CALCULADORA DE <span class="text-neon-red glow-text">TRADING</span>
+
+            <h1 class="text-2xl sm:text-4xl md:text-5xl font-black font-tech tracking-tight text-white mb-2 leading-[1.08]">
+                CALCULADORA DE <span class="glow-text">TRADING</span>
             </h1>
-            <p class="text-sm md:text-base text-gray-400 font-light flex items-center justify-center gap-2">
-                Diseñado & Desarrollado por 
+
+            <p class="text-xs sm:text-sm text-gray-400 font-light flex flex-wrap items-center justify-center gap-1.5">
+                Diseñado &amp; Desarrollado por
                 <span class="font-tech text-neon-red font-semibold tracking-wider glow-text border-b border-neon-red/40 pb-0.5">By: YasmaStark</span>
             </p>
         </header>
 
-        <!-- Barra Superior con Botón Historial & Teclado -->
-        <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
-            <button onclick="toggleKeypad()" class="px-4 py-2.5 rounded-2xl bg-black/60 border border-neon-red/30 text-gray-300 hover:text-white hover:border-neon-red text-xs font-tech font-bold ios-btn flex items-center gap-2 ios-blur">
-                <i data-lucide="calculator" class="w-4 h-4 text-neon-red"></i>
-                <span id="keypad-toggle-text">ABRIR TECLADO TÁCTIL</span>
-            </button>
-
-            <button onclick="toggleHistoryModal()" class="px-5 py-2.5 rounded-2xl bg-neon-card border border-neon-red/40 text-white hover:border-neon-red text-xs font-tech font-bold ios-btn flex items-center gap-2 shadow-neon-glow ios-blur">
-                <i data-lucide="history" class="w-4 h-4 text-neon-red"></i>
-                VER HISTORIAL (<span id="history-count">0</span>)
-            </button>
-        </div>
-
-        <!-- Rejilla de los 3 Módulos -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Rejilla de los 3 Módulos Adapta Automáticamente a Pantallas Verticales y Zoom -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 items-stretch">
 
             <!-- MÓDULO 1: Capital Inicial -->
-            <section class="bg-neon-card border border-neon-red/30 rounded-3xl p-6 shadow-ios-card ios-blur flex flex-col justify-between transition-all duration-300 hover:border-neon-red/70">
+            <section class="card p-5 sm:p-6 flex flex-col justify-between ios-blur">
                 <div>
-                    <div class="flex items-center gap-3 mb-5">
-                        <div class="p-3 rounded-2xl bg-neon-red/10 border border-neon-red/30 text-neon-red">
-                            <i data-lucide="percent" class="w-5 h-5"></i>
+                    <div class="flex items-start justify-between gap-3 mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2.5 sm:p-3 rounded-2xl bg-neon-red/10 border border-neon-red/30 text-neon-red">
+                                <i data-lucide="percent" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h2 class="font-tech text-sm sm:text-[15px] font-bold text-white leading-tight">1. Capital Inicial</h2>
+                                <p class="text-[10px] sm:text-[11px] text-gray-400 mt-0.5">Porcentaje directo · redondeo hacia arriba</p>
+                            </div>
                         </div>
+                        <span class="card-index font-mono">01</span>
+                    </div>
+
+                    <div class="space-y-3.5">
                         <div>
-                            <h2 class="font-tech text-base font-bold text-white">1. Capital Inicial</h2>
-                            <p class="text-xs text-gray-400">Porcentaje directo (Math.ceil)</p>
+                            <label for="m1-base" class="block text-[10px] sm:text-[11px] font-medium text-gray-400 mb-1 uppercase tracking-[0.12em]">Capital Base ($)</label>
+                            <div class="relative rounded-2xl neon-input-wrap has-prefix overflow-hidden" id="wrap-m1-base">
+                                <span class="unit unit-left">$</span>
+                                <input type="number" inputmode="decimal" autocomplete="off" id="m1-base" placeholder="Ej: 100" step="any"
+                                    aria-label="Capital base del módulo 1"
+                                    class="calc-trigger-1 w-full bg-transparent pl-4 pr-4 py-2.5 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono num">
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="mb-4">
-                        <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider">Capital Base ($)</label>
-                        <div class="relative rounded-2xl bg-black/60 neon-input-wrap overflow-hidden" id="wrap-m1-base">
-                            <input type="number" id="m1-base" placeholder="Ej: 100" step="any"
-                                onclick="setActiveField('m1-base')"
-                                class="calc-trigger-1 w-full bg-transparent px-4 py-3 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono">
-                        </div>
-                    </div>
-
-                    <div class="mb-6">
-                        <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider">Porcentaje (%)</label>
-                        <div class="relative rounded-2xl bg-black/60 neon-input-wrap overflow-hidden" id="wrap-m1-percent">
-                            <input type="number" id="m1-percent" placeholder="Ej: 15" step="any"
-                                onclick="setActiveField('m1-percent')"
-                                class="calc-trigger-1 w-full bg-transparent px-4 py-3 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono">
+                        <div>
+                            <label for="m1-percent" class="block text-[10px] sm:text-[11px] font-medium text-gray-400 mb-1 uppercase tracking-[0.12em]">Porcentaje (%)</label>
+                            <div class="relative rounded-2xl neon-input-wrap has-suffix overflow-hidden" id="wrap-m1-percent">
+                                <span class="unit unit-right">%</span>
+                                <input type="number" inputmode="decimal" autocomplete="off" id="m1-percent" placeholder="Ej: 15" step="any"
+                                    aria-label="Porcentaje del módulo 1"
+                                    class="calc-trigger-1 w-full bg-transparent pl-4 pr-4 py-2.5 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono num">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="pt-4 border-t border-white/5">
-                    <div class="bg-black/80 rounded-2xl p-4 mb-4 border border-neon-red/20">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-xs text-gray-400">Resultado Redondeado:</span>
-                            <span id="m1-exact" class="text-[10px] text-gray-500 font-mono">Exacto: $0.00</span>
+                <div class="pt-4 mt-4">
+                    <div class="result-panel p-3.5 sm:p-4">
+                        <div class="flex justify-between items-center gap-2 mb-1">
+                            <span class="text-[10px] sm:text-[11px] text-gray-400 uppercase tracking-wider">Resultado redondeado</span>
+                            <span id="m1-exact" class="text-[10px] text-gray-500 font-mono num">Exacto: $0.00</span>
                         </div>
-                        <div class="flex items-baseline justify-between">
-                            <span id="m1-result" class="text-3xl font-black text-neon-red font-tech glow-text">$0</span>
-                            <span class="text-[10px] text-neon-red font-semibold bg-neon-red/15 px-2.5 py-1 rounded-full border border-neon-red/30">Math.ceil ↑</span>
+                        <div class="flex items-baseline justify-between gap-2">
+                            <span id="m1-result" class="text-2xl sm:text-3xl lg:text-[2rem] font-black glow-text font-tech num">$0</span>
+                            <span class="chip font-sans">Math.ceil ↑</span>
                         </div>
                     </div>
-                    <button onclick="saveModule1ToHistory()" 
-                        class="w-full py-3.5 px-4 bg-gradient-to-r from-neon-red to-red-700 hover:from-red-600 hover:to-neon-red text-white font-tech text-xs font-bold rounded-2xl shadow-neon-button ios-btn flex items-center justify-center gap-2">
-                        <i data-lucide="bookmark-plus" class="w-4 h-4"></i>
-                        GUARDAR EN HISTORIAL
-                    </button>
                 </div>
             </section>
 
-            <!-- MÓDULO 2: Calculo del Limite -->
-            <section class="bg-neon-card border border-neon-red/40 rounded-3xl p-6 shadow-ios-card ios-blur flex flex-col justify-between transition-all duration-300 hover:border-neon-red relative overflow-hidden">
-                <div class="absolute -top-12 -right-12 w-28 h-28 bg-neon-red/15 rounded-full blur-2xl pointer-events-none"></div>
+            <!-- MÓDULO 2: Cálculo del Límite -->
+            <section class="card card-featured p-5 sm:p-6 flex flex-col justify-between ios-blur">
+                <div class="absolute -top-14 -right-10 w-32 h-32 bg-neon-red/15 rounded-full blur-3xl pointer-events-none"></div>
+
                 <div>
-                    <div class="flex items-center gap-3 mb-5">
-                        <div class="p-3 rounded-2xl bg-neon-red/15 border border-neon-red/40 text-neon-red shadow-neon-glow">
-                            <i data-lucide="trending-up" class="w-5 h-5"></i>
+                    <div class="flex items-start justify-between gap-3 mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2.5 sm:p-3 rounded-2xl bg-neon-red/15 border border-neon-red/40 text-neon-red shadow-neon-glow">
+                                <i data-lucide="trending-up" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h2 class="font-tech text-sm sm:text-[15px] font-bold text-white leading-tight">2. Cálculo del Límite</h2>
+                                <p class="text-[10px] sm:text-[11px] text-gray-400 mt-0.5">Inversión + % ganancia + $2</p>
+                            </div>
                         </div>
+                        <span class="card-index font-mono">02</span>
+                    </div>
+
+                    <div class="space-y-3.5">
                         <div>
-                            <h2 class="font-tech text-base font-bold text-white">2. Calculo del Limite</h2>
-                            <p class="text-xs text-gray-400">Inversión + % Ganancia + $2</p>
+                            <label for="m2-base" class="block text-[10px] sm:text-[11px] font-medium text-gray-400 mb-1 uppercase tracking-[0.12em]">Inversión Base ($)</label>
+                            <div class="relative rounded-2xl neon-input-wrap has-prefix overflow-hidden" id="wrap-m2-base">
+                                <span class="unit unit-left">$</span>
+                                <input type="number" inputmode="decimal" autocomplete="off" id="m2-base" placeholder="Ej: 100" step="any"
+                                    aria-label="Inversión base del módulo 2"
+                                    class="calc-trigger-2 w-full bg-transparent pl-4 pr-4 py-2.5 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono num">
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="mb-4">
-                        <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider">Inversión Base ($)</label>
-                        <div class="relative rounded-2xl bg-black/60 neon-input-wrap overflow-hidden" id="wrap-m2-base">
-                            <input type="number" id="m2-base" placeholder="Ej: 100" step="any"
-                                onclick="setActiveField('m2-base')"
-                                class="calc-trigger-2 w-full bg-transparent px-4 py-3 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono">
-                        </div>
-                    </div>
-
-                    <div class="mb-6">
-                        <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider">Porcentaje Ganancia (%)</label>
-                        <div class="relative rounded-2xl bg-black/60 neon-input-wrap overflow-hidden" id="wrap-m2-percent">
-                            <input type="number" id="m2-percent" placeholder="Ej: 10" step="any"
-                                onclick="setActiveField('m2-percent')"
-                                class="calc-trigger-2 w-full bg-transparent px-4 py-3 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono">
+                        <div>
+                            <label for="m2-percent" class="block text-[10px] sm:text-[11px] font-medium text-gray-400 mb-1 uppercase tracking-[0.12em]">Porcentaje Ganancia (%)</label>
+                            <div class="relative rounded-2xl neon-input-wrap has-suffix overflow-hidden" id="wrap-m2-percent">
+                                <span class="unit unit-right">%</span>
+                                <input type="number" inputmode="decimal" autocomplete="off" id="m2-percent" placeholder="Ej: 10" step="any"
+                                    aria-label="Porcentaje de ganancia del módulo 2"
+                                    class="calc-trigger-2 w-full bg-transparent pl-4 pr-4 py-2.5 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono num">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="pt-4 border-t border-white/5">
-                    <div class="bg-black/80 rounded-2xl p-4 mb-4 border border-neon-red/25 shadow-inner space-y-2">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-400">Ganancia + $2:</span>
-                            <span id="m2-profit" class="text-sm font-bold text-gray-200 font-mono">$0</span>
+                <div class="pt-4 mt-4">
+                    <div class="result-panel p-3.5 sm:p-4 space-y-2">
+                        <div class="flex justify-between items-center gap-2">
+                            <span class="text-[10px] sm:text-[11px] text-gray-400 uppercase tracking-wider">Ganancia + $2</span>
+                            <span id="m2-profit" class="text-sm font-bold text-gray-100 font-mono num">$0</span>
                         </div>
-                        <div class="flex justify-between items-center pt-1.5 border-t border-white/10">
+                        <div class="divider pt-2 flex items-end justify-between gap-2">
                             <div>
-                                <span class="block text-xs text-gray-300 font-semibold">Total Límite:</span>
-                                <span id="m2-exact" class="text-[10px] text-gray-500 font-mono">Exacto: $0.00</span>
+                                <span class="block text-[10px] sm:text-[11px] text-gray-300 font-semibold uppercase tracking-wider">Total límite</span>
+                                <span id="m2-exact" class="text-[10px] text-gray-500 font-mono num">Exacto: $0.00</span>
                             </div>
-                            <span id="m2-total" class="text-3xl font-black text-neon-red font-tech glow-text">$0</span>
+                            <span id="m2-total" class="text-2xl sm:text-3xl lg:text-[2rem] font-black glow-text font-tech num">$0</span>
                         </div>
                     </div>
-                    <button onclick="saveModule2ToHistory()" 
-                        class="w-full py-3.5 px-4 bg-gradient-to-r from-neon-red to-red-700 hover:from-red-600 hover:to-neon-red text-white font-tech text-xs font-bold rounded-2xl shadow-neon-button ios-btn flex items-center justify-center gap-2">
-                        <i data-lucide="bookmark-plus" class="w-4 h-4"></i>
-                        GUARDAR EN HISTORIAL
-                    </button>
                 </div>
             </section>
 
             <!-- MÓDULO 3: Gestión de Riesgo -->
-            <section class="bg-neon-card border border-neon-red/30 rounded-3xl p-6 shadow-ios-card ios-blur flex flex-col justify-between transition-all duration-300 hover:border-neon-red/70">
+            <section class="card p-5 sm:p-6 flex flex-col justify-between ios-blur md:col-span-2 lg:col-span-1">
                 <div>
-                    <div class="flex items-center gap-3 mb-5">
-                        <div class="p-3 rounded-2xl bg-neon-red/10 border border-neon-red/30 text-neon-red">
-                            <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                    <div class="flex items-start justify-between gap-3 mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2.5 sm:p-3 rounded-2xl bg-neon-red/10 border border-neon-red/30 text-neon-red">
+                                <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h2 class="font-tech text-sm sm:text-[15px] font-bold text-white leading-tight">3. Gestión de Riesgo</h2>
+                                <p class="text-[10px] sm:text-[11px] text-gray-400 mt-0.5">Riesgo máximo &amp; precio de salida</p>
+                            </div>
                         </div>
+                        <span class="card-index font-mono">03</span>
+                    </div>
+
+                    <div class="space-y-3.5">
                         <div>
-                            <h2 class="font-tech text-base font-bold text-white">3. Gestión de Riesgo</h2>
-                            <p class="text-xs text-gray-400">Riesgo Máximo & Precio de Salida</p>
+                            <div class="flex justify-between items-center mb-1 gap-2">
+                                <label for="m3-base" class="block text-[10px] sm:text-[11px] font-medium text-gray-400 uppercase tracking-[0.12em]">Capital / Posición ($)</label>
+                                <span class="chip font-mono">Auto-Sync</span>
+                            </div>
+                            <div class="relative rounded-2xl neon-input-wrap has-prefix overflow-hidden" id="wrap-m3-base">
+                                <span class="unit unit-left">$</span>
+                                <input type="number" inputmode="decimal" autocomplete="off" id="m3-base" placeholder="Ej: 100" step="any"
+                                    aria-label="Capital o posición del módulo 3"
+                                    class="calc-trigger-3 w-full bg-transparent pl-4 pr-4 py-2.5 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono num">
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="mb-4">
-                        <div class="flex justify-between items-center mb-1.5">
-                            <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider">Capital / Posición ($)</label>
-                            <span class="text-[10px] text-neon-red font-mono font-semibold">Auto-Sync</span>
-                        </div>
-                        <div class="relative rounded-2xl bg-black/60 neon-input-wrap overflow-hidden" id="wrap-m3-base">
-                            <input type="number" id="m3-base" placeholder="Ej: 100" step="any"
-                                onclick="setActiveField('m3-base')"
-                                class="calc-trigger-3 w-full bg-transparent px-4 py-3 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono">
-                        </div>
-                    </div>
-
-                    <div class="mb-6">
-                        <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider">% Máximo Riesgo (%)</label>
-                        <div class="relative rounded-2xl bg-black/60 neon-input-wrap overflow-hidden" id="wrap-m3-percent">
-                            <input type="number" id="m3-percent" placeholder="Ej: 5" step="any"
-                                onclick="setActiveField('m3-percent')"
-                                class="calc-trigger-3 w-full bg-transparent px-4 py-3 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono">
+                        <div>
+                            <label for="m3-percent" class="block text-[10px] sm:text-[11px] font-medium text-gray-400 mb-1 uppercase tracking-[0.12em]">% Máximo Riesgo (%)</label>
+                            <div class="relative rounded-2xl neon-input-wrap has-suffix overflow-hidden" id="wrap-m3-percent">
+                                <span class="unit unit-right">%</span>
+                                <input type="number" inputmode="decimal" autocomplete="off" id="m3-percent" placeholder="Ej: 5" step="any"
+                                    aria-label="Porcentaje máximo de riesgo del módulo 3"
+                                    class="calc-trigger-3 w-full bg-transparent pl-4 pr-4 py-2.5 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono num">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="pt-4 border-t border-white/5">
-                    <div class="bg-black/80 rounded-2xl p-4 mb-4 border border-neon-red/20 space-y-2">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-400">Riesgo Máximo ($):</span>
-                            <span id="m3-loss" class="text-base font-bold text-red-500 font-tech">$0</span>
+                <div class="pt-4 mt-4">
+                    <div class="result-panel p-3.5 sm:p-4 space-y-2">
+                        <div class="flex justify-between items-center gap-2">
+                            <span class="text-[10px] sm:text-[11px] text-gray-400 uppercase tracking-wider">Riesgo máximo ($)</span>
+                            <span id="m3-loss" class="text-sm font-bold text-red-500 font-tech num">$0</span>
                         </div>
-                        <div class="flex justify-between items-center pt-1 border-t border-white/10">
-                            <span class="text-xs text-gray-300 font-semibold">Precio de Salida (Stop):</span>
-                            <span id="m3-stop" class="text-2xl font-black text-neon-red font-tech glow-text">$0</span>
+                        <div class="divider pt-2 flex items-center justify-between gap-2">
+                            <span class="text-[10px] sm:text-[11px] text-gray-300 font-semibold uppercase tracking-wider">Precio de salida (Stop)</span>
+                            <span id="m3-stop" class="text-xl sm:text-2xl lg:text-[1.7rem] font-black glow-text font-tech num">$0</span>
                         </div>
                     </div>
-                    <button onclick="saveModule3ToHistory()" 
-                        class="w-full py-3.5 px-4 bg-gradient-to-r from-neon-red to-red-700 hover:from-red-600 hover:to-neon-red text-white font-tech text-xs font-bold rounded-2xl shadow-neon-button ios-btn flex items-center justify-center gap-2">
-                        <i data-lucide="bookmark-plus" class="w-4 h-4"></i>
-                        GUARDAR EN HISTORIAL
-                    </button>
                 </div>
             </section>
 
         </div>
 
-        <!-- TECLADO TÁCTIL MÓVIL DESPLEGABLE -->
-        <div id="touch-keypad" class="hidden mb-8 bg-neon-card border border-neon-red/40 rounded-3xl p-5 shadow-ios-card ios-blur max-w-sm mx-auto">
-            <div class="flex justify-between items-center mb-3 pb-2 border-b border-white/10">
-                <span class="text-xs font-tech font-bold text-gray-300">TECLADO TÁCTIL RÁPIDO</span>
-                <span id="active-field-name" class="text-[10px] text-neon-red font-mono font-bold uppercase">Selecciona casilla</span>
-            </div>
-            <div class="grid grid-cols-3 gap-2 font-tech font-bold text-lg text-white">
-                <button onclick="pressKey('1')" class="keypad-btn py-3 rounded-xl">1</button>
-                <button onclick="pressKey('2')" class="keypad-btn py-3 rounded-xl">2</button>
-                <button onclick="pressKey('3')" class="keypad-btn py-3 rounded-xl">3</button>
-                <button onclick="pressKey('4')" class="keypad-btn py-3 rounded-xl">4</button>
-                <button onclick="pressKey('5')" class="keypad-btn py-3 rounded-xl">5</button>
-                <button onclick="pressKey('6')" class="keypad-btn py-3 rounded-xl">6</button>
-                <button onclick="pressKey('7')" class="keypad-btn py-3 rounded-xl">7</button>
-                <button onclick="pressKey('8')" class="keypad-btn py-3 rounded-xl">8</button>
-                <button onclick="pressKey('9')" class="keypad-btn py-3 rounded-xl">9</button>
-                <button onclick="pressKey('.')" class="keypad-btn py-3 rounded-xl text-neon-red">.</button>
-                <button onclick="pressKey('0')" class="keypad-btn py-3 rounded-xl">0</button>
-                <button onclick="pressKey('DEL')" class="keypad-btn py-3 rounded-xl text-red-400 flex items-center justify-center">
-                    <i data-lucide="backspace" class="w-5 h-5"></i>
-                </button>
-            </div>
-            <button onclick="pressKey('CLR')" class="w-full mt-2 py-2 rounded-xl bg-red-950/60 border border-red-500/40 text-red-300 text-xs font-tech font-bold hover:bg-red-900/60">
-                LIMPIAR CAMPO
-            </button>
-        </div>
+        <!-- Nota de uso -->
+        <p class="text-center text-[10px] sm:text-[11px] text-gray-600 font-mono mb-2">
+            Los resultados se actualizan en tiempo real
+        </p>
 
-    </div>
-
-    <!-- MODAL HISTORIAL -->
-    <div id="history-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
-        <div class="bg-neon-card border border-neon-red/40 rounded-3xl max-w-3xl w-full p-6 shadow-2xl transform scale-95 transition-all duration-300 ios-blur flex flex-col max-h-[85vh]">
-            <div class="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
-                <div class="flex items-center gap-3">
-                    <div class="p-2.5 rounded-2xl bg-neon-red/15 border border-neon-red/40 text-neon-red">
-                        <i data-lucide="history" class="w-5 h-5"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-tech text-lg font-bold text-white">Historial de Operaciones</h3>
-                        <p class="text-xs text-gray-400">Almacenado localmente</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="clearHistory()" class="px-3.5 py-2 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 text-xs font-semibold ios-btn flex items-center gap-1.5">
-                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                        Borrar
-                    </button>
-                    <button onclick="toggleHistoryModal()" class="p-2 rounded-xl bg-white/10 text-gray-300 hover:text-white ios-btn">
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="overflow-y-auto flex-grow rounded-2xl border border-white/10 bg-black/60">
-                <table class="w-full text-left border-collapse">
-                    <thead class="sticky top-0 bg-[#0c0205] border-b border-white/10 text-[11px] font-tech text-gray-400 uppercase tracking-wider z-10">
-                        <tr>
-                            <th class="py-3 px-4">Hora</th>
-                            <th class="py-3 px-4">Módulo</th>
-                            <th class="py-3 px-4">Entradas</th>
-                            <th class="py-3 px-4 text-right">Resultado</th>
-                            <th class="py-3 px-4 text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-table-body" class="divide-y divide-white/5 text-sm font-mono">
-                        <!-- Carga Dinámica -->
-                    </tbody>
-                </table>
-                <div id="empty-history" class="py-12 text-center text-gray-500 text-sm">
-                    No hay operaciones guardadas en el historial.
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Footer Signature -->
-    <footer class="relative z-10 text-center py-6 border-t border-white/5 bg-black/80 ios-blur mt-8">
-        <p class="text-xs text-gray-500 font-tech">
-            &copy; <span id="year">2026</span> | Estética Neón & Animaciones iOS <span class="text-neon-red font-bold glow-text">By: YasmaStark</span>
+    <footer class="relative z-10 text-center py-4 border-t border-white/5 bg-black/80 ios-blur mt-4">
+        <p class="text-[10px] sm:text-[11px] text-gray-500 font-tech tracking-wide">
+            &copy; <span id="year">2026</span> | Estética Neón &amp; Animaciones iOS <span class="font-bold glow-text">By: YasmaStark</span>
         </p>
     </footer>
 
     <!-- LÓGICA JAVASCRIPT COMPLETA -->
     <script>
-        const STORAGE_KEY = 'yasma_neon_calc_history_v3';
-        let history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        let activeInputId = 'm1-base';
+        const THEME_KEY = 'yasma_neon_calc_theme';
 
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            const msg = document.getElementById('toast-msg');
-            msg.textContent = message;
-            toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
-            toast.classList.add('opacity-100', 'translate-y-0');
+        function changeTheme(themeName) {
+            if (themeName === 'cyan') {
+                document.documentElement.setAttribute('data-theme', 'cyan');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+            localStorage.setItem(THEME_KEY, themeName);
+            document.getElementById('theme-select').value = themeName;
+        }
 
-            setTimeout(() => {
-                toast.classList.remove('opacity-100', 'translate-y-0');
-                toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
-            }, 2500);
+        function loadSavedTheme() {
+            const savedTheme = localStorage.getItem(THEME_KEY) || 'red';
+            changeTheme(savedTheme);
         }
 
         function formatCurrency(val) {
             if (isNaN(val) || val === null) return '$0.00';
             return '$' + Number(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-
-        function setActiveField(id) {
-            activeInputId = id;
-            document.querySelectorAll('.neon-input-wrap').forEach(el => el.classList.remove('active-keypad-field'));
-            const wrap = document.getElementById(`wrap-${id}`);
-            if (wrap) wrap.classList.add('active-keypad-field');
-            
-            const fieldNames = {
-                'm1-base': 'Cap. Base Módulo 1',
-                'm1-percent': '% Módulo 1',
-                'm2-base': 'Inversión Módulo 2',
-                'm2-percent': '% Módulo 2',
-                'm3-base': 'Capital Módulo 3',
-                'm3-percent': '% Riesgo Módulo 3'
-            };
-            document.getElementById('active-field-name').textContent = fieldNames[id] || id;
-        }
-
-        function toggleKeypad() {
-            const keypad = document.getElementById('touch-keypad');
-            const toggleText = document.getElementById('keypad-toggle-text');
-            if (keypad.classList.contains('hidden')) {
-                keypad.classList.remove('hidden');
-                toggleText.textContent = 'OCULTAR TECLADO TÁCTIL';
-                setActiveField(activeInputId);
-            } else {
-                keypad.classList.add('hidden');
-                toggleText.textContent = 'ABRIR TECLADO TÁCTIL';
-            }
-        }
-
-        function pressKey(key) {
-            const input = document.getElementById(activeInputId);
-            if (!input) return;
-
-            if (key === 'DEL') {
-                input.value = input.value.slice(0, -1);
-            } else if (key === 'CLR') {
-                input.value = '';
-            } else {
-                if (key === '.' && input.value.includes('.')) return;
-                input.value += key;
-            }
-
-            // Trigger calculation event
-            input.dispatchEvent(new Event('input'));
         }
 
         /* ---------------- MÓDULO 1: Capital Inicial ---------------- */
@@ -495,23 +582,6 @@
             document.getElementById('m1-result').textContent = `$${rounded}`;
 
             return { baseVal, percentVal, exact, rounded };
-        }
-
-        function saveModule1ToHistory() {
-            const res = calculateModule1();
-            if (!res) {
-                showToast('Ingresa datos válidos en Capital Inicial');
-                return;
-            }
-            addHistoryRecord({
-                id: Date.now(),
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-                type: 'Capital Inicial',
-                inputs: `$${res.baseVal} × ${res.percentVal}%`,
-                result: `$${res.rounded} (Ex: $${res.exact.toFixed(2)})`,
-                copyVal: res.rounded
-            });
-            showToast(`Capital Inicial Guardado: $${res.rounded}`);
         }
 
         /* ---------------- MÓDULO 2: Calculo del Limite (Con Auto-Sync) ---------------- */
@@ -547,23 +617,6 @@
             return { baseVal, percentVal, profitRounded, totalExact, totalRounded };
         }
 
-        function saveModule2ToHistory() {
-            const res = calculateModule2();
-            if (!res) {
-                showToast('Ingresa datos válidos en Calculo del Limite');
-                return;
-            }
-            addHistoryRecord({
-                id: Date.now(),
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-                type: 'Calculo del Limite',
-                inputs: `Inv: $${res.baseVal} | +${res.percentVal}% + $2`,
-                result: `Límite: $${res.totalRounded} (+ $${res.profitRounded})`,
-                copyVal: res.totalRounded
-            });
-            showToast(`Calculo del Limite Guardado: Total $${res.totalRounded}`);
-        }
-
         /* ---------------- MÓDULO 3: Gestión de Riesgo ---------------- */
         function calculateModule3() {
             const baseVal = parseFloat(document.getElementById('m3-base').value);
@@ -584,123 +637,6 @@
             return { baseVal, percentVal, riskDollars, exitLevel };
         }
 
-        function saveModule3ToHistory() {
-            const res = calculateModule3();
-            if (!res) {
-                showToast('Ingresa datos válidos en Gestión de Riesgo');
-                return;
-            }
-            addHistoryRecord({
-                id: Date.now(),
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-                type: 'Gestión de Riesgo',
-                inputs: `Cap: $${res.baseVal} | Riesgo: ${res.percentVal}%`,
-                result: `Stop: $${res.exitLevel} (Riesgo: $${res.riskDollars})`,
-                copyVal: res.exitLevel
-            });
-            showToast(`Gestión de Riesgo Guardado: Stop en $${res.exitLevel}`);
-        }
-
-        /* ---------------- HISTORIAL & LOCALSTORAGE ---------------- */
-        function toggleHistoryModal() {
-            const modal = document.getElementById('history-modal');
-            const isHidden = modal.classList.contains('pointer-events-none');
-
-            if (isHidden) {
-                modal.classList.remove('opacity-0', 'pointer-events-none');
-                modal.firstElementChild.classList.remove('scale-95');
-                modal.firstElementChild.classList.add('scale-100');
-            } else {
-                modal.classList.add('opacity-0', 'pointer-events-none');
-                modal.firstElementChild.classList.remove('scale-100');
-                modal.firstElementChild.classList.add('scale-95');
-            }
-        }
-
-        function addHistoryRecord(entry) {
-            history.unshift(entry);
-            if (history.length > 50) history.pop();
-            saveHistory();
-            renderHistory();
-        }
-
-        function deleteHistoryItem(id) {
-            history = history.filter(item => item.id !== id);
-            saveHistory();
-            renderHistory();
-            showToast('Elemento eliminado del historial');
-        }
-
-        function saveHistory() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-            document.getElementById('history-count').textContent = history.length;
-        }
-
-        function clearHistory() {
-            if (history.length === 0) return;
-            history = [];
-            saveHistory();
-            renderHistory();
-            showToast('Historial vaciado completamente');
-        }
-
-        function copyToClipboard(val) {
-            const textarea = document.createElement('textarea');
-            textarea.value = val;
-            document.body.appendChild(textarea);
-            textarea.select();
-            try {
-                document.execCommand('copy');
-                showToast(`Copiado: $${val}`);
-            } catch (err) {
-                showToast('Error al copiar');
-            }
-            document.body.removeChild(textarea);
-        }
-
-        function renderHistory() {
-            const tbody = document.getElementById('history-table-body');
-            const emptyMsg = document.getElementById('empty-history');
-
-            document.getElementById('history-count').textContent = history.length;
-            tbody.innerHTML = '';
-
-            if (history.length === 0) {
-                emptyMsg.classList.remove('hidden');
-                return;
-            }
-
-            emptyMsg.classList.add('hidden');
-
-            history.forEach(item => {
-                const row = document.createElement('tr');
-                row.className = "hover:bg-white/5 transition-colors border-b border-white/5";
-                row.innerHTML = `
-                    <td class="py-3 px-4 text-xs text-gray-400 font-mono">${item.timestamp}</td>
-                    <td class="py-3 px-4 text-xs font-semibold text-neon-red font-sans">${item.type}</td>
-                    <td class="py-3 px-4 text-xs font-mono text-gray-300">${item.inputs}</td>
-                    <td class="py-3 px-4 text-xs font-tech font-bold text-white text-right glow-text">${item.result}</td>
-                    <td class="py-3 px-4 text-center flex items-center justify-center gap-1.5">
-                        <button onclick="copyToClipboard('${item.copyVal}')" 
-                            title="Copiar resultado"
-                            class="p-1.5 rounded-lg bg-white/5 hover:bg-neon-red/20 text-gray-300 hover:text-neon-red transition-all ios-btn">
-                            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                        </button>
-                        <button onclick="deleteHistoryItem(${item.id})" 
-                            title="Eliminar registro"
-                            class="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/25 text-red-400 transition-all ios-btn">
-                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-        }
-
         /* ---------------- CANVAS PARTÍCULAS INTERACTIVAS ---------------- */
         const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
@@ -710,6 +646,16 @@
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+        }
+
+        function getParticleColor(alpha) {
+            const isCyan = document.documentElement.getAttribute('data-theme') === 'cyan';
+            return isCyan ? `rgba(0, 255, 255, ${alpha})` : `rgba(255, 0, 51, ${alpha})`;
+        }
+
+        function getParticleShadowColor() {
+            const isCyan = document.documentElement.getAttribute('data-theme') === 'cyan';
+            return isCyan ? '#00ffff' : '#ff0033';
         }
 
         class Particle {
@@ -736,9 +682,9 @@
             }
 
             draw() {
-                ctx.fillStyle = `rgba(255, 0, 51, ${this.alpha})`;
+                ctx.fillStyle = getParticleColor(this.alpha);
                 ctx.shadowBlur = 10;
-                ctx.shadowColor = '#ff0033';
+                ctx.shadowColor = getParticleShadowColor();
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
@@ -762,7 +708,7 @@
 
                     if (dist < 110) {
                         const opacity = (1 - dist / 110) * 0.22;
-                        ctx.strokeStyle = `rgba(255, 0, 51, ${opacity})`;
+                        ctx.strokeStyle = getParticleColor(opacity);
                         ctx.lineWidth = 0.6;
                         ctx.beginPath();
                         ctx.moveTo(particles[a].x, particles[a].y);
@@ -785,11 +731,10 @@
 
         /* ---------------- INICIALIZACIÓN ---------------- */
         window.onload = function() {
+            loadSavedTheme();
             resizeCanvas();
             initParticles();
             animate();
-            renderHistory();
-            setActiveField('m1-base');
 
             if (window.lucide) {
                 lucide.createIcons();
