@@ -7,8 +7,8 @@
     <meta name="description" content="Calculadora de trading: capital inicial, cálculo del límite y gestión de riesgo. Por YasmaStark.">
     <title>Calculadora de Trading - YasmaStark</title>
 
-    <!-- Favicon SVG Red Neón & Negro -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%23080103'/><path d='M12 44 L28 28 L38 38 L52 18' stroke='%23ff0033' stroke-width='5' stroke-linecap='round' stroke-linejoin='round' fill='none' filter='drop-shadow(0 0 6px %23ff0033)'/><text x='16' y='52' fill='%23ffffff' font-family='sans-serif' font-weight='bold' font-size='12'>$⚡</text></svg>">
+    <!-- Favicon SVG Calculadora Cyan Neón & Negro -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%23080103'/><rect x='14' y='12' width='36' height='40' rx='8' fill='%23080103' stroke='%2300ffff' stroke-width='3.5' filter='drop-shadow(0 0 5px %2300ffff)'/><rect x='20' y='18' width='24' height='10' rx='4' fill='%2300ffff' fill-opacity='0.25' stroke='%2300ffff' stroke-width='2'/><rect x='20' y='32' width='6' height='6' rx='2' fill='%2300ffff'/><rect x='29' y='32' width='6' height='6' rx='2' fill='%2300ffff'/><rect x='38' y='32' width='6' height='6' rx='2' fill='%2300ffff'/><rect x='20' y='41' width='6' height='6' rx='2' fill='%2300ffff'/><rect x='29' y='41' width='6' height='6' rx='2' fill='%2300ffff'/><rect x='38' y='41' width='6' height='6' rx='2' fill='%2300ffff'/></svg>">
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -253,6 +253,22 @@
             color: var(--neon-main);
         }
 
+        /* Estilos de Iluminación para la Tabla de Escenarios */
+        .glow-cyan-text {
+            color: #00ffff;
+            text-shadow: 0 0 14px rgba(0, 255, 255, 0.85), 0 0 28px rgba(0, 255, 255, 0.4);
+        }
+
+        .glow-red-text {
+            color: #ff0033;
+            text-shadow: 0 0 14px rgba(255, 0, 51, 0.85), 0 0 28px rgba(255, 0, 51, 0.4);
+        }
+
+        .text-soft-red {
+            color: rgba(255, 75, 100, 0.85);
+            text-shadow: 0 0 8px rgba(255, 0, 51, 0.25);
+        }
+
         .text-neon-red {
             color: var(--neon-main) !important;
         }
@@ -388,7 +404,7 @@
                             <label for="m1-percent" class="block text-[10px] sm:text-[11px] font-medium text-gray-400 mb-1 uppercase tracking-[0.12em]">Porcentaje (%)</label>
                             <div class="relative rounded-2xl neon-input-wrap has-suffix overflow-hidden" id="wrap-m1-percent">
                                 <span class="unit unit-right">%</span>
-                                <input type="number" inputmode="decimal" autocomplete="off" id="m1-percent" placeholder="Ej: 15" step="any"
+                                <input type="number" inputmode="decimal" autocomplete="off" id="m1-percent" value="50" placeholder="Ej: 50" step="any"
                                     aria-label="Porcentaje del módulo 1"
                                     class="calc-trigger-1 w-full bg-transparent pl-4 pr-4 py-2.5 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono num">
                             </div>
@@ -443,7 +459,7 @@
                             <label for="m2-percent" class="block text-[10px] sm:text-[11px] font-medium text-gray-400 mb-1 uppercase tracking-[0.12em]">Porcentaje Ganancia (%)</label>
                             <div class="relative rounded-2xl neon-input-wrap has-suffix overflow-hidden" id="wrap-m2-percent">
                                 <span class="unit unit-right">%</span>
-                                <input type="number" inputmode="decimal" autocomplete="off" id="m2-percent" placeholder="Ej: 10" step="any"
+                                <input type="number" inputmode="decimal" autocomplete="off" id="m2-percent" value="10" placeholder="Ej: 10" step="any"
                                     aria-label="Porcentaje de ganancia del módulo 2"
                                     class="calc-trigger-2 w-full bg-transparent pl-4 pr-4 py-2.5 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono num">
                             </div>
@@ -502,7 +518,7 @@
                             <label for="m3-percent" class="block text-[10px] sm:text-[11px] font-medium text-gray-400 mb-1 uppercase tracking-[0.12em]">% Máximo Riesgo (%)</label>
                             <div class="relative rounded-2xl neon-input-wrap has-suffix overflow-hidden" id="wrap-m3-percent">
                                 <span class="unit unit-right">%</span>
-                                <input type="number" inputmode="decimal" autocomplete="off" id="m3-percent" placeholder="Ej: 5" step="any"
+                                <input type="number" inputmode="decimal" autocomplete="off" id="m3-percent" value="20" placeholder="Ej: 5" step="any"
                                     aria-label="Porcentaje máximo de riesgo del módulo 3"
                                     class="calc-trigger-3 w-full bg-transparent pl-4 pr-4 py-2.5 text-white text-base font-semibold focus:outline-none placeholder-gray-600 font-mono num">
                             </div>
@@ -524,6 +540,42 @@
                 </div>
             </section>
 
+        </div>
+
+        <!-- BOTÓN DE ESCENARIOS MÚLTIPLES -->
+        <div class="flex justify-center mb-6">
+            <button id="toggle-table-btn" onclick="toggleScenariosTable()" class="ios-btn bg-neon-red/15 hover:bg-neon-red/25 border border-neon-red/50 text-white font-tech font-bold py-3 px-6 rounded-2xl shadow-neon-glow flex items-center gap-2 cursor-pointer transition-all">
+                <i data-lucide="table" class="w-5 h-5 text-neon-red"></i>
+                <span>CALCULAR ESCENARIOS DE GANANCIA + RIESGO (20%)</span>
+            </button>
+        </div>
+
+        <!-- TABLA RESULTADOS DE ESCENARIOS -->
+        <div id="scenarios-container" class="hidden card p-4 sm:p-6 mb-6 ios-blur">
+            <div class="flex items-center justify-between mb-4 border-b border-neon-red/20 pb-3">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="layers" class="w-5 h-5 text-neon-red"></i>
+                    <h3 class="font-tech text-base sm:text-lg font-bold text-white">Resultados de Escenarios Múltiples</h3>
+                </div>
+                <span class="text-[11px] font-mono text-gray-400">Riesgo en Límite: <strong class="text-neon-red">20%</strong></span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-white/10 text-gray-400 text-xs font-tech uppercase tracking-wider">
+                            <th class="py-3 px-4">Meta Ganancia</th>
+                            <th class="py-3 px-4">Ganancia + $2</th>
+                            <th class="py-3 px-4 text-cyan-400">Total Límite</th>
+                            <th class="py-3 px-4 text-red-300">Riesgo 20% ($)</th>
+                            <th class="py-3 px-4 text-red-500">Precio Salida (Stop)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scenarios-body" class="divide-y divide-white/5 font-tech">
+                        <!-- Filas inyectadas por JavaScript -->
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Nota de uso -->
@@ -601,6 +653,7 @@
                 document.getElementById('m2-profit').textContent = '$0';
                 document.getElementById('m2-exact').textContent = 'Exacto: $0.00';
                 document.getElementById('m2-total').textContent = '$0';
+                updateScenariosTable();
                 return null;
             }
 
@@ -613,6 +666,8 @@
             document.getElementById('m2-profit').textContent = `$${profitRounded}`;
             document.getElementById('m2-exact').textContent = `Exacto: ${formatCurrency(totalExact)}`;
             document.getElementById('m2-total').textContent = `$${totalRounded}`;
+
+            updateScenariosTable();
 
             return { baseVal, percentVal, profitRounded, totalExact, totalRounded };
         }
@@ -635,6 +690,50 @@
             document.getElementById('m3-stop').textContent = `$${exitLevel}`;
 
             return { baseVal, percentVal, riskDollars, exitLevel };
+        }
+
+        /* ---------------- TABLA DE ESCENARIOS MÚLTIPLES ---------------- */
+        function toggleScenariosTable() {
+            const container = document.getElementById('scenarios-container');
+            container.classList.toggle('hidden');
+            updateScenariosTable();
+        }
+
+        function updateScenariosTable() {
+            const tbody = document.getElementById('scenarios-body');
+            if (!tbody) return;
+
+            const baseVal = parseFloat(document.getElementById('m2-base').value);
+            const percentages = [10, 25, 35, 50, 75, 100];
+            const riskPercent = 20;
+
+            if (isNaN(baseVal) || baseVal <= 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-500 font-mono text-sm">Ingresa una Inversión Base en el Módulo 2 para calcular los escenarios.</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            percentages.forEach(p => {
+                const profitExact = (baseVal * (p / 100)) + 2;
+                const profitRounded = Math.ceil(profitExact);
+                const totalRounded = Math.ceil(baseVal + profitExact);
+
+                // Riesgo del 20% calculado DIRECTAMENTE sobre el Total Límite de este porcentaje
+                const riskOnLimitDollars = Math.ceil(totalRounded * (riskPercent / 100));
+                const stopPriceOnLimit = totalRounded - riskOnLimitDollars;
+
+                html += `
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="py-3.5 px-4 font-bold text-white text-base sm:text-lg">${p}%</td>
+                        <td class="py-3.5 px-4 font-extrabold text-green-400 text-lg sm:text-2xl num">$${profitRounded}</td>
+                        <td class="py-3.5 px-4 font-black glow-cyan-text text-xl sm:text-3xl num">$${totalRounded}</td>
+                        <td class="py-3.5 px-4 font-bold text-soft-red text-lg sm:text-2xl num">$${riskOnLimitDollars}</td>
+                        <td class="py-3.5 px-4 font-black glow-red-text text-xl sm:text-3xl num">$${stopPriceOnLimit}</td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
         }
 
         /* ---------------- CANVAS PARTÍCULAS INTERACTIVAS ---------------- */
@@ -758,6 +857,11 @@
                 input.addEventListener('keyup', calculateModule3);
                 input.addEventListener('change', calculateModule3);
             });
+
+            // Realizar cálculos con los valores iniciales predeterminados
+            calculateModule1();
+            calculateModule2();
+            calculateModule3();
 
             document.getElementById('year').textContent = new Date().getFullYear();
         };
