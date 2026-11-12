@@ -546,7 +546,7 @@
         <div class="flex justify-center mb-6">
             <button id="toggle-table-btn" onclick="toggleScenariosTable()" class="ios-btn bg-neon-red/15 hover:bg-neon-red/25 border border-neon-red/50 text-white font-tech font-bold py-3 px-6 rounded-2xl shadow-neon-glow flex items-center gap-2 cursor-pointer transition-all">
                 <i data-lucide="table" class="w-5 h-5 text-neon-red"></i>
-                <span>CALCULAR ESCENARIOS DE GANANCIA + RIESGO (20%)</span>
+                <span id="btn-scenarios-label">CALCULAR ESCENARIOS DE GANANCIA</span>
             </button>
         </div>
 
@@ -557,7 +557,6 @@
                     <i data-lucide="layers" class="w-5 h-5 text-neon-red"></i>
                     <h3 class="font-tech text-base sm:text-lg font-bold text-white">Resultados de Escenarios Múltiples</h3>
                 </div>
-                <span class="text-[11px] font-mono text-gray-400">Riesgo en Límite: <strong class="text-neon-red">20%</strong></span>
             </div>
 
             <div class="overflow-x-auto">
@@ -567,8 +566,6 @@
                             <th class="py-3 px-4">Meta Ganancia</th>
                             <th class="py-3 px-4">Ganancia + $2</th>
                             <th class="py-3 px-4 text-cyan-400">Total Límite</th>
-                            <th class="py-3 px-4 text-red-300">Riesgo 20% ($)</th>
-                            <th class="py-3 px-4 text-red-500">Precio Salida (Stop)</th>
                         </tr>
                     </thead>
                     <tbody id="scenarios-body" class="divide-y divide-white/5 font-tech">
@@ -705,10 +702,9 @@
 
             const baseVal = parseFloat(document.getElementById('m2-base').value);
             const percentages = [10, 25, 35, 50, 75, 100];
-            const riskPercent = 20;
 
             if (isNaN(baseVal) || baseVal <= 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-500 font-mono text-sm">Ingresa una Inversión Base en el Módulo 2 para calcular los escenarios.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-gray-500 font-mono text-sm">Ingresa una Inversión Base en el Módulo 2 para calcular los escenarios.</td></tr>`;
                 return;
             }
 
@@ -718,17 +714,11 @@
                 const profitRounded = Math.ceil(profitExact);
                 const totalRounded = Math.ceil(baseVal + profitExact);
 
-                // Riesgo del 20% calculado DIRECTAMENTE sobre el Total Límite de este porcentaje
-                const riskOnLimitDollars = Math.ceil(totalRounded * (riskPercent / 100));
-                const stopPriceOnLimit = totalRounded - riskOnLimitDollars;
-
                 html += `
                     <tr class="hover:bg-white/5 transition-colors">
                         <td class="py-3.5 px-4 font-bold text-white text-base sm:text-lg">${p}%</td>
                         <td class="py-3.5 px-4 font-extrabold text-green-400 text-lg sm:text-2xl num">$${profitRounded}</td>
                         <td class="py-3.5 px-4 font-black glow-cyan-text text-xl sm:text-3xl num">$${totalRounded}</td>
-                        <td class="py-3.5 px-4 font-bold text-soft-red text-lg sm:text-2xl num">$${riskOnLimitDollars}</td>
-                        <td class="py-3.5 px-4 font-black glow-red-text text-xl sm:text-3xl num">$${stopPriceOnLimit}</td>
                     </tr>
                 `;
             });
